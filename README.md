@@ -5,13 +5,13 @@
 ### Проект "Фудграм"
 Дипломный проект в рамках обучения на курсе "Python разработчик буткемп" Яндекс Практикума. Разработка бэкенд приложения и настройка автодеплоя на сервер в Docker.
 
-![example workflow](https://github.com/Kentiy2717/kittygram_final/actions/workflows/main.yml/badge.svg)
+![example workflow](https://github.com/Kentiy2717/foodgram/actions/workflows/main.yml/badge.svg)
 
 Август 2024.
 
 ### Технологии
 
-Python, Django, Pytest, Flake8, Docker
+Python, Django, Django Rest Framework, Pytest, Flake8, Docker, CI/CD
 
 ### Команда проекта
 
@@ -29,32 +29,29 @@ Python, Django, Pytest, Flake8, Docker
 
 ### Как запустить проект
 
-Проект "Tasky" - доступен по адресу https://sherrycask.zapto.org
-Проект "Kittygram" - доступен по адресу https://sherrycask.mooo.com
+Проект "Foodgram" - доступен по адресу https://sherrycask.jumpingcrab.com
 
-#  Как работать с репозиторием финального задания
+### Документация
 
-## Что нужно сделать
+Документация API и примеры запросов доступны по адресу http://sherrycask.jumpingcrab.com/api/docs/
 
-Настроить запуск проекта Kittygram в контейнерах и CI/CD с помощью GitHub Actions
+### Пример запроса
 
-## Как проверить работу с помощью автотестов
+Список рецептов.
 
-В корне репозитория создайте файл tests.yml со следующим содержимым:
-```yaml
-repo_owner: ваш_логин_на_гитхабе
-kittygram_domain: полная ссылка (https://доменное_имя) на ваш проект Kittygram
-taski_domain: полная ссылка (https://доменное_имя) на ваш проект Taski
-dockerhub_username: ваш_логин_на_докерхабе
+Страница доступна всем пользователям. Доступна фильтрация по избранному, автору, списку покупок и тегам.
+
+При переходе в браузере по адресу http://sherrycask.jumpingcrab.com/api/recipes/
+
+пользователь получит ответ следующего формата:
+
 ```
-
-Скопируйте содержимое файла `.github/workflows/main.yml` в файл `kittygram_workflow.yml` в корневой директории проекта.
-
-Для локального запуска тестов создайте виртуальное окружение, установите в него зависимости из backend/requirements.txt и запустите в корневой директории проекта `pytest`.
-
-## Чек-лист для проверки перед отправкой задания
-
-- Проект Taski доступен по доменному имени, указанному в `tests.yml`.
-- Проект Kittygram доступен по доменному имени, указанному в `tests.yml`.
-- Пуш в ветку main запускает тестирование и деплой Kittygram, а после успешного деплоя вам приходит сообщение в телеграм.
-- В корне проекта есть файл `kittygram_workflow.yml`.
+{
+    "count": 123,
+    "next": "http://foodgram.example.org/api/recipes/?page=4",
+    "previous": "http://foodgram.example.org/api/recipes/?page=2",
+    "results": [
+        + { ... }
+    ]
+}
+```
