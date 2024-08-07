@@ -29,11 +29,11 @@ Python, Django, Django Rest Framework, Pytest, Flake8, Docker, CI/CD
 
 ### Как запустить проект
 
-Проект "Foodgram" - доступен по адресу https://sherrycask.jumpingcrab.com
+Проект "Foodgram" - доступен по адресу https://sherrycask.zapto.org/
 
 ### Документация
 
-Документация API и примеры запросов доступны по адресу http://sherrycask.jumpingcrab.com/api/docs/
+Документация API и примеры запросов доступны по адресу https://sherrycask.zapto.org/api/docs/
 
 ### Пример запроса
 
