@@ -24,16 +24,16 @@ services:
     build: ./frontend/
     command: cp -r /app/build/. /frontend_static/
     volumes:
-      - static:/frontend_static/
       - ./frontend/:/app/result_build/
+      - static:/frontend_static/
   gateway:
     build: ./nginx/
     env_file: .env
     volumes:
-      - static:/staticfiles/
-      - media:/app/media/
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
+      - static:/staticfiles/
+      - media:/app/media/
     ports:
       - "8080:80"
     depends_on:
