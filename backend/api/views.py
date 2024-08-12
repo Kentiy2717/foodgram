@@ -4,9 +4,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from users.models import User
+from food.models import Ingredients, Tag, Recipe, User
 from .permissions import IsAdminOrReadOnly
-from .serializers import SignUpSerializer, UserSerializer
+from .serializers import (
+    IngredientsSerializer,
+    RecipeSerializer,
+    SignUpSerializer,
+    TagSerializer,
+    UserSerializer
+)
 
 class UsersViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -43,11 +49,39 @@ class UsersViewSet(ModelViewSet):
         return Response(serializer.data)
 
 
-class SignUpView(APIView):
-    serializer_class = SignUpSerializer
+class IngredientsViewSet(ModelViewSet):
+    queryset = Ingredients.objects.all()
+    serializer_class = IngredientsSerializer
+    http_method_names = ('get', 'patch', 'post', 'delete')
 
     def post(self, request, *args, **kwargs):
-        serializer = SignUpSerializer(data=request.data)
+        serializer = IngredientsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+
+
+class RecipesViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    http_method_names = ('get', 'patch', 'post', 'delete')
+
+    def post(self, request, *args, **kwargs):
+        serializer = RecipeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class TagsViewSet(ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    http_method_names = ('get', 'patch', 'post', 'delete')
+
+    def post(self, request, *args, **kwargs):
+        serializer = TagSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
