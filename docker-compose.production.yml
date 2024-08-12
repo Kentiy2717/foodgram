@@ -20,7 +20,7 @@ services:
   frontend:
     env_file: .env
     image: kentiy2717/foodgram_frontend
-    command: cp -r /app/build/. /static/
+    command: cp -r /app/build/. /frontend_static/
     volumes:
       - static_volume:/frontend_static/
       - ./frontend/:/app/result_build/
