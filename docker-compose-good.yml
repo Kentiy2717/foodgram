@@ -1,22 +1,22 @@
 volumes:
-  pg_data_volume:
-  static_volume:
-  media_volume:
+  pg_data:
+  static:
+  media:
 
 services:
   db:
     image: postgres:13
     env_file: .env
     volumes:
-      - pg_data_volume:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
   backend:
     build: ./backend/
     env_file: .env
     volumes:
-      - static_volume:/backend_static/
-      - media_volume:/app/media/
+      - static:/backend_static/
+      - media:/app/media/
     depends_on: 
       - db
   frontend:
@@ -24,14 +24,14 @@ services:
     build: ./frontend/
     command: cp -r /app/build/. /frontend_static/
     volumes:
-      - static_volume:/frontend_static/
+      - static:/frontend_static/
       - ./frontend/:/app/result_build/
   gateway:
     build: ./nginx/
     env_file: .env
     volumes:
-      - static_volume:/staticfiles/
-      - media_volume:/app/media/
+      - static:/staticfiles/
+      - media:/app/media/
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
     ports:
@@ -39,4 +39,3 @@ services:
     depends_on:
       - backend
       - frontend
-      
