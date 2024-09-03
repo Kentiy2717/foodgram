@@ -56,7 +56,7 @@ admin.site.register(User)
 # 
 # 
 # @admin.register(RecipeIngredients)
-# class IngredientRecipeAdmin(admin.ModelAdmin):
+# class RecipeIngredientsAdmin(admin.ModelAdmin):
 #     list_display = ('id', 'recipe', 'ingredient', 'amount')
 #     list_display_links = ('recipe',)
 #     search_fields = ('recipe',)

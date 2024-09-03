@@ -154,14 +154,14 @@ class RecipesViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         ingredients_obj = (
             RecipeIngredients.objects.filter(recipe__carts__user=request.user)
-            .values('ingredient__name', 'ingredient__measurement_unit')
+            .values('ingredients__name', 'ingredients__measurement_unit')
             .annotate(sum_amount=Sum('amount'))
         )
         data_dict = {}
         ingredients_list = []
         for item in ingredients_obj:
-            name = item['ingredient__name'].capitalize()
-            unit = item['ingredient__measurement_unit']
+            name = item['ingredients__name'].capitalize()
+            unit = item['ingredients__measurement_unit']
             sum_amount = item['sum_amount']
             data_dict[name] = [sum_amount, unit]
         for ind, (key, value) in enumerate(data_dict.items(), 1):

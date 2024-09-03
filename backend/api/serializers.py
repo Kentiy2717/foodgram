@@ -183,7 +183,7 @@ class RecipeListSerializer(serializers.ModelSerializer):    # тут все но
 
     tags = TagSerializer(many=True, read_only=True)  # read_only=True точно надо?
     author = FoodgramUserSerializer(read_only=True)
-    ingredients = IngredientsSerializer(many=True, read_only=True)
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -270,7 +270,7 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
         ingredients_list = [
             RecipeIngredients(
                 recipe=recipe,
-                ingredient=ingredient.get('id'),
+                ingredients=ingredient.get('id'),
                 amount=ingredient.get('amount')
             )
             for ingredient in ingredients
