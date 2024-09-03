@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework.authtoken',
     'rest_framework',
     'djoser',
@@ -115,25 +116,43 @@ MEDIA_ROOT = BASE_DIR / '../media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.IsAuthenticated',
-#     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
 
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework.authentication.TokenAuthentication',
-#     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
+    ],
 
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     ],
+#    'DEFAULT_AUTHENTICATION_CLASSES': [
+#        'rest_framework_simplejwt.authentication.JWTAuthentication',
+#    ],
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 6,
 }
 
-# SIMPLE_JWT = {
+DJOSER = {
+    # 'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    # 'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    # 'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    # 'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user': 'api.serializers.FoodgramUserSerializer',
+        # 'current_user': 'api.serializers.FoodgramUserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
+    'HIDE_USERS': False  # Если установлено значение True, то при перечислении /users/ enpoint обычным пользователем в списке будет отображаться только профиль
+}
+
+#SIMPLE_JWT = {
 #    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
 #    'AUTH_HEADER_TYPES': ('Bearer',),
-# } 
+#}
 
 AUTH_USER_MODEL = 'users.User'

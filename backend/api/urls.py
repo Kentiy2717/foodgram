@@ -5,25 +5,23 @@ from .views import (
     IngredientsViewSet,
     RecipesViewSet,
     TagsViewSet,
-    UsersViewSet,
+    AvatarViewSet,
 )
 
 
 v1_router = DefaultRouter()
 v1_router.register('ingredients', IngredientsViewSet, basename='ingredients')
 v1_router.register('recipes', RecipesViewSet, basename='recipes')
-v1_router.register('signup', UsersViewSet, basename='users')
 v1_router.register('tags', TagsViewSet, basename='tags')
-v1_router.register('users', UsersViewSet, basename='users')
 
-#v1_auth_urls = [
-#     path('', include('djoser.urls')),  # ???
-#     path('', include('djoser.urls.jwt')),  # ???
-#    path('signup/', SignUpView.as_view(), name='signup'),
-#]
+v1_auth_urls = [
+    path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
+    path('users/me/avatar/', AvatarViewSet.as_view(), name='avatar'),
+]
 
 
 urlpatterns = [
     path('', include(v1_router.urls)),
-#    path('auth/', include(v1_auth_urls)),
+    path('', include(v1_auth_urls)),
 ]

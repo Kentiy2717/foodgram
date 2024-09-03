@@ -40,6 +40,20 @@ class User(AbstractUser):
         verbose_name='Пароль',
         max_length=NAME_MAX_LENGTH
     )
+    is_staff = models.BooleanField(
+        verbose_name='Статус персонала',
+        default=False
+    )
+    is_subscribed = models.BooleanField(
+        verbose_name='Статус подписки',
+        default=False
+    )
+    avatar = models.ImageField(
+        verbose_name='Аватар',
+        upload_to='users/',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -49,3 +63,29 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+
+class Subscribe(models.Model):
+    """Модель подписки."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Автор'
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = (  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!  
+            models.UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_subscription'
+            ),
+        )
