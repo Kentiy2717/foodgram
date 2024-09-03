@@ -1,12 +1,13 @@
 from django.contrib import admin
 
-from food.models import Ingredients, Tag, Recipe, User
+from food.models import Ingredients, Tag, Recipe, User, ShoppingCart, Favourites
 
 admin.site.register(Ingredients)
 admin.site.register(Tag)
 admin.site.register(Recipe)
-# admin.site.register(RecipeIngredients)
 admin.site.register(User)
+admin.site.register(ShoppingCart)
+admin.site.register(Favourites)
 
 
 # from django.contrib import admin

@@ -152,10 +152,9 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):  # тут все
     """Сериализатор ингредиентов рецепта."""
 
     id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredients.objects.all(),
-        source='ingredients.id'
+        queryset=Ingredients.objects.all()
     )
-    mesurement_unit = serializers.ReadOnlyField(  # в гугле CharField 
+    measurement_unit = serializers.ReadOnlyField(  # в гугле CharField 
         source='ingredients.measurement_unit'
     )
     name = serializers.ReadOnlyField(  # в гугле CharField 
@@ -168,7 +167,7 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):  # тут все
             'id',
             'name',
             'amount',
-            'mesurement_unit',
+            'measurement_unit',
         )
         validators = [
             UniqueTogetherValidator(
@@ -183,7 +182,10 @@ class RecipeListSerializer(serializers.ModelSerializer):    # тут все но
 
     tags = TagSerializer(many=True, read_only=True)  # read_only=True точно надо?
     author = FoodgramUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = RecipeIngredientsSerializer(
+        many=True,
+        source='recipe_ingredients'
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -332,24 +334,17 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
 
 
 
-# class SignUpSerializer(serializers.Serializer):
-#     email = serializers.EmailField(
-#         required=True,
-#         max_length=EMAIL_MAX_LENGTH,
-#     )
-#     username = serializers.CharField(
-#         required=True,
-#         max_length=NAME_MAX_LENGTH,
-#     )
-#     first_name = serializers.CharField(
-#         required=True,
-#         max_length=NAME_MAX_LENGTH,
-#     )
-#     last_name = serializers.CharField(
-#         required=True,
-#         max_length=NAME_MAX_LENGTH,
-#     )
-#     password = serializers.CharField(
-#         required=True,
-#         max_length=NAME_MAX_LENGTH,
-#     )
+class FavouritesSerializer(serializers.ModelSerializer):
+    """Сериализатор избранных рецептов."""
+
+    class Meta:
+        model = Favourites
+        fields = '__all__'
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор списка покупок."""
+
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
