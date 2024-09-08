@@ -91,18 +91,80 @@ class FoodgramUserSerializer(UserSerializer):  # тут все нормальн�
         return user
 
 
-class TagSerializer(serializers.ModelSerializer):  # тут все нормально
-    """Сериализатор тега."""
+class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все нормально
+    """Сериализатор подписки."""
+
+    user = serializers.SlugRelatedField(
+        slug_field='id',
+        queryset=User.objects.all(),
+        default=serializers.CurrentUserDefault()
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='id',
+        queryset=User.objects.all(),
+    )
+
+    def validate(self, data):
+        if (data['user'] == data['author'] and self.context['request'].method == 'POST'):
+            raise serializers.ValidationError(
+                'Нельзя подписаться на себя.'
+            )
+        return data
 
     class Meta:
-        model = Tag
+        model = Subscribe
+        fields = (
+            'user',
+            'author',
+        )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscribe.objects.all(),
+                fields=('user', 'author'),
+                message='Вы уже подписаны на этого пользователя.'
+            )
+        ]
+
+
+class SubscribeListSerializer(serializers.ModelSerializer):  # тут все нормально
+    """Сериализатор подписки."""
+
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(
+        source='recipes.count',
+        read_only=True
+    )
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return Subscribe.objects.filter(user=request.user, author=obj).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        recipes_limit = request.GET.get('recipes_limit')
+        author = get_object_or_404(User, id=obj.id)
+        recipes = Recipe.objects.filter(author=author)
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        serializers = SubscribeRecipeSerializer(
+            recipes,
+            many=True,
+            context={'request': request}
+        )
+        return serializers.data
+
+    class Meta:
+        model = Subscribe
         fields = (
             'id',
             'name',
-            'slug',
-            'color',
+            'image',
+            'cooking_time',
         )
-        # read_only_fields = ('id', 'name', 'slug', 'color')
+        # read_only_fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class SubscribeRecipeSerializer(serializers.ModelSerializer):  # тут все нормально
@@ -117,6 +179,20 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):  # тут все �
             'cooking_time',
         )
         # read_only_fields = ('id', 'name', 'image', 'cooking_time')  # надо?
+
+
+class TagSerializer(serializers.ModelSerializer):  # тут все нормально
+    """Сериализатор тега."""
+
+    class Meta:
+        model = Tag
+        fields = (
+            'id',
+            'name',
+            'slug',
+        )
+        # read_only_fields = ('id', 'name', 'slug', 'color')
+
 
 
 class IngredientsSerializer(serializers.ModelSerializer):  # тут все нормально
@@ -292,14 +368,14 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
             ingredients_list = [
                 RecipeIngredients(
                     recipe=instance,
-                    ingredient=ingredient.get('id'),
+                    ingredients=ingredient.get('id'),
                     amount=ingredient.get('amount')
                 )
                 for ingredient in ingredients
             ]
             RecipeIngredients.objects.bulk_create(ingredients_list)
         return instance
-    
+
     def validate(self, data):  # в гугле другое
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
@@ -326,12 +402,6 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
             'text',
             'cooking_time',
         )
-
-
-
-
-
-
 
 
 class FavouritesSerializer(serializers.ModelSerializer):

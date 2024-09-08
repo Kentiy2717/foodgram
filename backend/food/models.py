@@ -46,12 +46,6 @@ class Tag(models.Model):  # тут все нормально
         max_length=MAX_NAME_LENGTH,
         unique=True
     )
-    color = models.CharField(  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
-        verbose_name='Цвет тега',
-        max_length=MAX_COLOR_LENGTH,
-        unique=True,
-        default='#ffffff'
-    )
 
     class Meta:
         verbose_name = 'Тег'

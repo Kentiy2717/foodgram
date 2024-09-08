@@ -2,7 +2,7 @@ from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -26,10 +26,13 @@ from .serializers import (
     RecipeSerializer,
     TagSerializer,
     FoodgramUserSerializer,
+    SubscribeListSerializer,
     SubscribeRecipeSerializer,
+    SubscribeCreateSerializer,
     ShoppingCartSerializer,
     FavouritesSerializer
 )
+from users.models import Subscribe
 
 
 class FoodgramUserViewSet(UserViewSet):
@@ -176,3 +179,54 @@ class RecipesViewSet(ModelViewSet):
                 f'{ind}. {key} - ' f'{value[0]} ' f'{value[1]}'
             )
         return download_pdf(ingredients_list)
+
+
+class SubscriptionsViewSet(ModelViewSet):
+
+    @action(
+        methods=['POST'],
+        detail=True,
+        permission_classes=(IsAuthenticated,)
+    )
+    def subscribe(self, request, **kwargs):
+        id = kwargs.get('pk')
+        author = get_object_or_404(User, id=id)
+        user = self.request.user
+        data = {'user': user.id, 'author': id}
+        serializer = SubscribeCreateSerializer(
+            data=data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        subscribe = Subscribe.objects.create(user=user, author=author)
+        serializer = SubscribeCreateSerializer(
+            subscribe,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, **kwargs):
+        id = kwargs.get('pk')
+        author = get_object_or_404(User, id=id)
+        user = self.request.user
+        subscribe = Subscribe.objects.filter(user=user, author=author)
+        if subscribe.exists():
+            subscribe.delete()
+            return Response(
+                {'detail': 'Вы отписались от этого пользователя'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        return Response(
+            {'detail': 'Вы не были подписаны на этого пользователя'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class SubscribeListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = SubscribeListSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return User.objects.filter(author_subscription__user=self.request.user)
