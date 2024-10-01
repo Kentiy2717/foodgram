@@ -91,13 +91,36 @@ class FoodgramUserSerializer(UserSerializer):  # тут все нормальн�
         return user
 
 
+class SubscribtionsUserSerializer(FoodgramUserSerializer):
+    """Сериализатор автора."""
+
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(
+        read_only=True,
+        source='recipes.count'
+    )
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        recipes_limit = request.GET.get('recipes_limit')
+        try:
+            recipes_limit = int(recipes_limit)
+            recipes = obj.recipes.all()[:recipes_limit]
+        except (TypeError, ValueError):
+            recipes = obj.recipes.all()
+        return RecipeListSerializer(recipes, many=True).data
+    
+    class Meta(FoodgramUserSerializer.Meta):
+        fields = FoodgramUserSerializer.Meta.fields + ('recipes', 'recipes_count')
+
+
 class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все нормально
     """Сериализатор подписки."""
 
     user = serializers.SlugRelatedField(
         slug_field='id',
-        queryset=User.objects.all(),
-        default=serializers.CurrentUserDefault()
+        default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
     author = serializers.SlugRelatedField(
         slug_field='id',
@@ -105,11 +128,17 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все �
     )
 
     def validate(self, data):
-        if (data['user'] == data['author'] and self.context['request'].method == 'POST'):
+        if self.context['request'].user == data['author']:
             raise serializers.ValidationError(
                 'Нельзя подписаться на себя.'
             )
         return data
+    
+    def to_representation(self, instance):
+        return SubscribtionsUserSerializer(
+            instance.author,
+            context=self.context
+        ).data
 
     class Meta:
         model = Subscribe
@@ -119,7 +148,7 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все �
         )
         validators = [
             UniqueTogetherValidator(
-                queryset=Subscribe.objects.all(),
+                queryset=model.objects.all(),
                 fields=('user', 'author'),
                 message='Вы уже подписаны на этого пользователя.'
             )
