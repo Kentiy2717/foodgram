@@ -46,8 +46,8 @@ class FoodgramUserSerializer(UserSerializer):  # тут все нормальн�
             return False
         return Subscribe.objects.filter(user=request.user, author=obj).exists()
 
-    def get_avatar(self, obj):  # Это точно надо?
-        return obj.avatar.url if obj.avatar else None
+#     def get_avatar(self, obj):  # Это точно надо?
+#         return obj.avatar.url if obj.avatar else None
 
     class Meta:
         model = User
@@ -204,7 +204,7 @@ class IngredientsSerializer(serializers.ModelSerializer):  # тут все но�
             'name',
             'measurement_unit',
         )
-        # read_only_fields = ('id', 'name', 'measurement_unit')  # надо?
+#         read_only_fields = ('id', 'name', 'measurement_unit')  # надо?
 
 
 class IngredientsCreateSerializer(serializers.ModelSerializer):  # тут все нормально
@@ -226,8 +226,11 @@ class IngredientsCreateSerializer(serializers.ModelSerializer):  # тут все
 class RecipeIngredientsSerializer(serializers.ModelSerializer):  # тут все нормально
     """Сериализатор ингредиентов рецепта."""
 
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredients.objects.all()
+    # id = serializers.PrimaryKeyRelatedField(
+    #     queryset=Ingredients.objects.all()
+    # )
+    id = serializers.IntegerField(
+        source='ingredients.id'
     )
     measurement_unit = serializers.ReadOnlyField(  # в гугле CharField 
         source='ingredients.measurement_unit'
@@ -264,9 +267,9 @@ class RecipeListSerializer(serializers.ModelSerializer):    # тут все но
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
-    def get_ingredients(self, obj):
-        ingredients = RecipeIngredients.objects.filter(recipe=obj)
-        return IngredientsSerializer(ingredients, many=True).data
+#     def get_ingredients(self, obj):
+#         ingredients = RecipeIngredients.objects.filter(recipe=obj)
+#         return IngredientsSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):  # тут не совпадает с гуглом
         request = self.context.get('request')
@@ -355,7 +358,7 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
         RecipeIngredients.objects.bulk_create(ingredients_list)
         return recipe
 
-    @transaction.atomic
+#    @transaction.atomic
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)

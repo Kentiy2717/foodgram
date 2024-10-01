@@ -36,8 +36,48 @@ from users.models import Subscribe
 
 
 class FoodgramUserViewSet(UserViewSet):
-    queryset = User.objects.all()
     serializer_class = FoodgramUserSerializer
+
+    @action(
+        methods=['POST'],
+        detail=True,
+        permission_classes=(IsAuthenticated,)
+    )
+    def subscribe(self, request, **kwargs):
+        '''Подписка на пользователя'''
+        id = kwargs.get('pk')
+        author = get_object_or_404(User, id=id)
+        user = self.request.user
+        data = {'user': user.id, 'author': id}
+        serializer = SubscribeCreateSerializer(
+            data=data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        subscribe = Subscribe.objects.create(user=user, author=author)
+        serializer = SubscribeCreateSerializer(
+            subscribe,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, **kwargs):
+        '''Отписка от пользователя'''
+        id = kwargs.get('pk')
+        author = get_object_or_404(User, id=id)
+        user = self.request.user
+        subscribe = Subscribe.objects.filter(user=user, author=author)
+        if subscribe.exists():
+            subscribe.delete()
+            return Response(
+                {'detail': 'Вы отписались от этого пользователя'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        return Response(
+            {'detail': 'Вы не были подписаны на этого пользователя'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class AvatarViewSet(APIView):
@@ -60,16 +100,16 @@ class AvatarViewSet(APIView):
 class IngredientsViewSet(ModelViewSet):
     queryset = Ingredients.objects.all()
     serializer_class = IngredientsSerializer
-    http_method_names = ('get', 'post')
+    http_method_names = ('get',)
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
 
-    def post(self, request, *args, **kwargs):
-        serializer = IngredientsSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+#     def post(self, request, *args, **kwargs):
+#         serializer = IngredientsSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data)
 
 
 # class RecipesViewSet(ModelViewSet):
@@ -87,14 +127,14 @@ class IngredientsViewSet(ModelViewSet):
 class TagsViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    http_method_names = ('get', 'post',)
+    http_method_names = ('get',)
     pagination_class = None
 
-    def post(self, request, *args, **kwargs):
-        serializer = TagSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+#     def post(self, request, *args, **kwargs):
+#         serializer = TagSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data)
 
 
 class RecipesViewSet(ModelViewSet):
@@ -179,50 +219,6 @@ class RecipesViewSet(ModelViewSet):
                 f'{ind}. {key} - ' f'{value[0]} ' f'{value[1]}'
             )
         return download_pdf(ingredients_list)
-
-
-class SubscriptionsViewSet(ModelViewSet):
-
-    @action(
-        methods=['POST'],
-        detail=True,
-        permission_classes=(IsAuthenticated,)
-    )
-    def subscribe(self, request, **kwargs):
-        '''Подписка на пользователя'''
-        id = kwargs.get('pk')
-        author = get_object_or_404(User, id=id)
-        user = self.request.user
-        data = {'user': user.id, 'author': id}
-        serializer = SubscribeCreateSerializer(
-            data=data,
-            context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        subscribe = Subscribe.objects.create(user=user, author=author)
-        serializer = SubscribeCreateSerializer(
-            subscribe,
-            context={'request': request}
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    @subscribe.mapping.delete
-    def unsubscribe(self, request, **kwargs):
-        '''Отписка от пользователя'''
-        id = kwargs.get('pk')
-        author = get_object_or_404(User, id=id)
-        user = self.request.user
-        subscribe = Subscribe.objects.filter(user=user, author=author)
-        if subscribe.exists():
-            subscribe.delete()
-            return Response(
-                {'detail': 'Вы отписались от этого пользователя'},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(
-            {'detail': 'Вы не были подписаны на этого пользователя'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
 
 class SubscribeListView(generics.ListAPIView):
