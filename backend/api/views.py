@@ -78,12 +78,24 @@ class FoodgramUserViewSet(UserViewSet):
             {'detail': 'Вы не были подписаны на этого пользователя'},
             status=status.HTTP_400_BAD_REQUEST
         )
-
-
-class AvatarViewSet(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
+    
+    @action(
+        methods=['GET'],
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        pagination_class=None
+    )
+    def me(self, request):
+        serializer = FoodgramUserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(
+        methods=['PUT'],
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_path='me/avatar',
+    )
+    def put_avatar(self, request):
         serializer = FoodgramUserSerializer(
             request.user,
             data=request.data,
@@ -91,10 +103,32 @@ class AvatarViewSet(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def delete(self, request):
-        return Response({'success': 'Avatar deleted'})
+    @put_avatar.mapping.delete
+    def delete_avatar(self, request):
+        user = self.get_instance()
+        if user.avatar:
+            user.avatar.delete()
+            user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# class AvatarViewSet(APIView):
+#     permission_classes = [IsAuthenticated]
+# 
+#     def put(self, request):
+#         serializer = FoodgramUserSerializer(
+#             request.user,
+#             data=request.data,
+#             partial=True
+#         )
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data)
+#     
+#     def delete(self, request):
+#         return Response({'success': 'Avatar deleted'})
 
 
 class IngredientsViewSet(ModelViewSet):
