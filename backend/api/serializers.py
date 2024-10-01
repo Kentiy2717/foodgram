@@ -194,7 +194,6 @@ class TagSerializer(serializers.ModelSerializer):  # тут все нормал�
         # read_only_fields = ('id', 'name', 'slug', 'color')
 
 
-
 class IngredientsSerializer(serializers.ModelSerializer):  # тут все нормально
     """Сериализатор ингредиента."""
 

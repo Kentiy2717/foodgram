@@ -22,7 +22,7 @@ v1_auth_urls = [
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
     path('users/me/avatar/', AvatarViewSet.as_view(), name='avatar'),
-    path('users/subscriptions/', SubscribeListView.as_view(), name='subscriptions'),
+    path('subscriptions/', SubscribeListView.as_view(), name='subscriptions'),
 ]
 
 
