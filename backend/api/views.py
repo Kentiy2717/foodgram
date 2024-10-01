@@ -189,6 +189,7 @@ class SubscriptionsViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, **kwargs):
+        '''Подписка на пользователя'''
         id = kwargs.get('pk')
         author = get_object_or_404(User, id=id)
         user = self.request.user
@@ -207,6 +208,7 @@ class SubscriptionsViewSet(ModelViewSet):
     
     @subscribe.mapping.delete
     def unsubscribe(self, request, **kwargs):
+        '''Отписка от пользователя'''
         id = kwargs.get('pk')
         author = get_object_or_404(User, id=id)
         user = self.request.user
@@ -224,6 +226,7 @@ class SubscriptionsViewSet(ModelViewSet):
 
 
 class SubscribeListView(generics.ListAPIView):
+    '''Список подписок.'''
     queryset = User.objects.all()
     serializer_class = SubscribeListSerializer
     permission_classes = (IsAuthenticated,)
