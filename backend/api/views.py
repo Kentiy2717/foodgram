@@ -1,5 +1,6 @@
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import generics, status
@@ -185,7 +186,9 @@ class RecipesViewSet(ModelViewSet):
 
     def shopping_cart_favorite_hendler(self, model, serializator, recipe):
         user = self.request.user
-        serializator = serializator(data={'user': user.pk, 'recipe': recipe.pk})
+        serializator = serializator(
+            data={'user': user.pk, 'recipe': recipe.pk}
+        )
         if model.objects.filter(user=user, recipe=recipe).exists():
             if self.request.method == 'POST':
                 return Response(
@@ -230,29 +233,62 @@ class RecipesViewSet(ModelViewSet):
             recipe
         )
 
+#     @action(
+#         methods=['GET'],
+#         detail=False,
+#         permission_classes=(IsAuthenticated,),
+#         url_path='download_shopping_cart',
+#     )
+#     def download_shopping_cart(self, request):
+#         ingredients_obj = (
+#             RecipeIngredients.objects.filter(recipe__carts__user=request.user)
+#             .values('ingredients__name', 'ingredients__measurement_unit')
+#             .annotate(sum_amount=Sum('amount'))
+#         )
+#         data_dict = {}
+#         ingredients_list = []
+#         for item in ingredients_obj:
+#             name = item['ingredients__name'].capitalize()
+#             unit = item['ingredients__measurement_unit']
+#             sum_amount = item['sum_amount']
+#             data_dict[name] = [sum_amount, unit]
+#         for ind, (key, value) in enumerate(data_dict.items(), 1):
+#             if ind < 10:
+#                 ind = '0' + str(ind)
+#             ingredients_list.append(
+#                 f'{ind}. {key} - ' f'{value[0]} ' f'{value[1]}'
+#             )
+#         return download_pdf(ingredients_list)
+
     @action(
-        methods=['GET'],
         detail=False,
-        permission_classes=(IsAuthenticated,)
+        methods=('get',),
+        permission_classes=(IsAuthenticated,),
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        ingredients_obj = (
-            RecipeIngredients.objects.filter(recipe__carts__user=request.user)
-            .values('ingredients__name', 'ingredients__measurement_unit')
-            .annotate(sum_amount=Sum('amount'))
+        shopping_cart = ShoppingCart.objects.filter(user=self.request.user)
+        recipes = [item.recipe.id for item in shopping_cart]
+        buy = (
+            RecipeIngredients.objects.filter(recipe__in=recipes)
+            .values('ingredients')
+            .annotate(amount=Sum('amount'))
         )
-        data_dict = {}
-        ingredients_list = []
-        for item in ingredients_obj:
-            name = item['ingredients__name'].capitalize()
-            unit = item['ingredients__measurement_unit']
-            sum_amount = item['sum_amount']
-            data_dict[name] = [sum_amount, unit]
-        for ind, (key, value) in enumerate(data_dict.items(), 1):
-            if ind < 10:
-                ind = '0' + str(ind)
-            ingredients_list.append(
-                f'{ind}. {key} - ' f'{value[0]} ' f'{value[1]}'
+        purchased = [
+            "Список покупок:",
+        ]
+        for item in buy:
+            ingredient = Ingredients.objects.get(pk=item["ingredients"])
+            amount = item["amount"]
+            purchased.append(
+                f"{ingredient.name}: {amount}, "
+                f"{ingredient.measurement_unit}"
             )
-        return download_pdf(ingredients_list)
+        purchased_in_file = "\n".join(purchased)
+        response = HttpResponse(purchased_in_file, content_type="text/plain")
+        response[
+            "Content-Disposition"
+        ] = "attachment; filename=shopping-list.txt"
+        return response
 
