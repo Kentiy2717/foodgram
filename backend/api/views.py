@@ -291,4 +291,3 @@ class RecipesViewSet(ModelViewSet):
             "Content-Disposition"
         ] = "attachment; filename=shopping-list.txt"
         return response
-
