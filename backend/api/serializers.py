@@ -108,10 +108,23 @@ class SubscribtionsUserSerializer(FoodgramUserSerializer):
             recipes = obj.recipes.all()[:recipes_limit]
         except (TypeError, ValueError):
             recipes = obj.recipes.all()
-        return RecipeListSerializer(recipes, many=True).data
+        return ShortRecipeSerializer(recipes, many=True).data
     
     class Meta(FoodgramUserSerializer.Meta):
         fields = FoodgramUserSerializer.Meta.fields + ('recipes', 'recipes_count')
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор рецепта. Короткий список данных."""
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
 
 
 class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все нормально
@@ -408,17 +421,21 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
         return instance
 
     def validate(self, data):  # в гугле другое
-        ingredients = self.initial_data.get('ingredients')
+        ingredients = self.initial_data.get('ingredients', [])
+        ingredients_id = [ingredient.get('id') for ingredient in ingredients]
+        tags = self.initial_data.get('tags', [])
         if not ingredients:
             raise serializers.ValidationError('Добавьте ингредиенты')
-        ingredients_list = []
-        for ingredient_item in ingredients:
-            ingredient = ingredient_item['id']
-            if ingredient in ingredients_list:
-                raise serializers.ValidationError(
-                    'Ингредиенты должны быть уникальными'
-                )
-            ingredients_list.append(ingredient)
+        if len(ingredients_id) != len(set(ingredients_id)):
+            raise serializers.ValidationError(
+                'Ингредиенты должны быть уникальными'
+            )
+        if not tags:
+            raise serializers.ValidationError('Добавьте теги')
+        if len(tags) != len(set(tags)):
+            raise serializers.ValidationError(
+                'Теги должны быть уникальными'
+            )
         return data
 
     class Meta:
@@ -440,7 +457,16 @@ class FavouritesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Favourites
-        fields = '__all__'
+        fields = (
+            'user',
+            'recipe',
+        )
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(
+            instance.recipe,
+            read_only=True
+        ).data
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
@@ -448,7 +474,16 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShoppingCart
-        fields = '__all__'
+        fields = (
+            'user',
+            'recipe',
+        )
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(
+            instance.recipe,
+            read_only=True
+        ).data
 
 
 class AvatarSerializer(serializers.ModelSerializer):
