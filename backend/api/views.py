@@ -198,6 +198,11 @@ class RecipesViewSet(ModelViewSet):
             return Response(
                 status=status.HTTP_204_NO_CONTENT
             )
+        if self.request.method == 'DELETE':
+            return Response(
+                {'errors': 'Рецепта нет в списке покупок'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializator.is_valid(raise_exception=True)
         serializator.save()
         return Response(
