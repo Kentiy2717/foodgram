@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from food.filters import IngredientFilter, RecipeFilter, Recipe
@@ -37,6 +38,7 @@ from users.models import Subscribe
 
 class FoodgramUserViewSet(UserViewSet):
     serializer_class = FoodgramUserSerializer
+    pagination_class = LimitOffsetPagination
 
     @action(
         methods=['POST'],
@@ -167,12 +169,6 @@ class TagsViewSet(ModelViewSet):
     http_method_names = ('get',)
     pagination_class = None
 
-#     def post(self, request, *args, **kwargs):
-#         serializer = TagSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
-
 
 class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
@@ -180,6 +176,7 @@ class RecipesViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -268,6 +265,7 @@ class RecipesViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('get',),
+        url_path='get-link',
     )
     def get_link(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)

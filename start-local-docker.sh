@@ -7,3 +7,4 @@ docker compose -f docker-compose.yml exec backend python manage.py makemigration
 docker compose -f docker-compose.yml exec backend python manage.py makemigrations users
 docker compose -f docker-compose.yml exec backend python manage.py migrate
 docker-compose exec backend python manage.py get_of_ingredients --path data/
+docker-compose exec backend python manage.py collectstatic --no-input
