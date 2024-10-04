@@ -1,7 +1,11 @@
+import random
+
 from django.db import models
 from django.contrib.auth import get_user_model
 
 from .constants import (
+    CHARACTERS,
+    TOKEN_LENGTH,
     MAX_NAME_LENGTH,
     MAX_MEASUREMENT_UNIT_LENGTH
 )
@@ -90,6 +94,11 @@ class Recipe(models.Model):  # тут все нормально
         verbose_name='Дата публикации',
         auto_now_add=True
     )
+    short_url = models.CharField(
+        max_length=TOKEN_LENGTH,
+        unique=True,
+        blank=True
+    )
 
     class Meta:
         ordering = ('-pub_date',)
@@ -98,6 +107,26 @@ class Recipe(models.Model):  # тут все нормально
 
     def __str__(self):
         return f'{self.name} ({self.author})'  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
+    
+    def save(self, *args, **kwargs):
+        """
+        При создании токена достаточно только полной ссылки,
+        короткая ссылка генерируется автоматически.
+        Перед сохранением объекта токен проверяется на уникальность
+        """
+        if not self.short_url:
+            while True:  # цикл будет повторять до тех пор пока не сгенерирует уникальную ссылку
+                self.short_url = ''.join(
+                    random.choices(
+                        CHARACTERS,  # алфавит для генерации короткой ссылки мы будем хранить в файле настроек
+                        k=TOKEN_LENGTH  # длину короткой ссылки тоже
+                    )
+                )
+                if not Recipe.objects.filter(  # проверка на уникальность
+                    short_url=self.short_url
+                ).exists():
+                    break
+        super().save(*args, **kwargs)
 
 
 class RecipeIngredients(models.Model):  # тут все нормально

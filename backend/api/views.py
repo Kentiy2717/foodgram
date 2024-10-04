@@ -1,6 +1,6 @@
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import generics, status
@@ -30,8 +30,7 @@ from .serializers import (
     FoodgramUserSerializer,
     SubscribtionsUserSerializer,
     SubscribeCreateSerializer,
-    ShoppingCartSerializer,
-    TokenSerializer
+    ShoppingCartSerializer
 )
 from users.models import Subscribe
 
@@ -267,27 +266,23 @@ class RecipesViewSet(ModelViewSet):
         return response
     
     @action(
+        detail=True,
+        methods=('get',),
+    )
+    def get_link(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        url = request.build_absolute_uri(
+            f'/s/{recipe.short_url}'
+        )
+        return Response({'short_link': url}, status=status.HTTP_200_OK)
+    
+    @action(
         detail=False,
         methods=('get',),
-        permission_classes=(IsAuthenticated,),
-        url_path='(?P<pk>[^/.]+)/get-link',
+        url_path=r's/(?P<short_url>\w+)'
     )
-    def get_link(self, request):
-        serializer = TokenSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            token, status_code = serializer.create(
-                validated_data=serializer.validated_data
-            )
-            return Response(TokenSerializer(token).data, status=status_code)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
-#     def get_link(self, request):
-#         short_link = get_short_link(request)
-#         return Response({'short_link': short_link})
-# return HttpResponseRedirect(
-#             request.build_absolute_uri(
-#                 f'/recipes/{recipe.id}'
-#                 # reverse('api:recipes-detail', kwargs={'pk': recipe.id})
-#             )
-#         )
+    def redirect_link(self, request, short_url):
+        recipe = get_object_or_404(Recipe, short_url=short_url)
+        return HttpResponseRedirect(
+            request.build_absolute_uri(f'/recipes/{recipe.id}/')
+        )

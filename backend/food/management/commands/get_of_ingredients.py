@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 try:
                     obj, created = Ingredients.objects.get_or_create(
                         name=row[name_csv],
-                        unit_of_measurement=row[unit_of_measurement_csv],
+                        measurement_unit=row[unit_of_measurement_csv],
                     )
                     if not created:
                         print(f"Ингредиент {obj} уже tcnm в базе данных.")
