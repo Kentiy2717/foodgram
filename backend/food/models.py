@@ -2,12 +2,15 @@ import random
 
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
 
-from .constants import (
+from food.constants import (
     CHARACTERS,
     TOKEN_LENGTH,
     MAX_NAME_LENGTH,
-    MAX_MEASUREMENT_UNIT_LENGTH
+    MAX_MEASUREMENT_UNIT_LENGTH,
+    MAX_AMOUNT_VALUE,
+    MIN_AMOUNT_VALUE
 )
 
 User = get_user_model()
@@ -143,7 +146,9 @@ class RecipeIngredients(models.Model):  # тут все нормально
         verbose_name='Ингредиент'
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество'
+        verbose_name='Количество',
+        validators=[MinValueValidator(limit_value=MIN_AMOUNT_VALUE),
+                    MaxValueValidator(limit_value=MAX_AMOUNT_VALUE)]
     )
 
     class Meta:

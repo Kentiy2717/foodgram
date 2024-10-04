@@ -24,6 +24,7 @@ from food.models import (
 # from food.utils import download_pdf
 from .permissions import IsAdminOrReadOnly, IsAuthenticatedOwnerOrReadOnly
 from .serializers import (
+    AvatarSerializer,
     IngredientsSerializer,
     RecipeSerializer,
     TagSerializer,
@@ -86,8 +87,8 @@ class FoodgramUserViewSet(UserViewSet):
         url_path='me/avatar',
     )
     def put_avatar(self, request):
-        serializer = FoodgramUserSerializer(
-            request.user,
+        serializer = AvatarSerializer(
+            instance=self.get_instance(),
             data=request.data,
             partial=True
         )
@@ -272,7 +273,7 @@ class RecipesViewSet(ModelViewSet):
         url = request.build_absolute_uri(
             f'/s/{recipe.short_url}'
         )
-        return Response({'short_link': url}, status=status.HTTP_200_OK)
+        return Response({'short-link': url}, status=status.HTTP_200_OK)
     
     @action(
         detail=False,

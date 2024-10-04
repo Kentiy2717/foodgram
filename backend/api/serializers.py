@@ -449,3 +449,20 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = '__all__'
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    """Сериализатор аватара."""
+
+    avatar = Base64ImageField()
+
+    class Meta:
+        model = User
+        fields = ('avatar',)
+
+    def validate(self, data):
+        if 'avatar' not in data:
+            raise serializers.ValidationError(
+                'Поле "avatar" обязательно для заполнения'
+            )
+        return data
