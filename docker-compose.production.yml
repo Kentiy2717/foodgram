@@ -26,7 +26,7 @@ services:
       - ./frontend/:/app/result_build/
 
   gateway:
-    image: kentiy2717/foodgram_gateway
+    image: nginx:alpine-slim
     env_file: .env
     volumes:
       - static_volume:/var/html/static/
