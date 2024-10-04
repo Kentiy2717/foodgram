@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 from .constants import (
-    MAX_COLOR_LENGTH,
     MAX_NAME_LENGTH,
     MAX_MEASUREMENT_UNIT_LENGTH
 )

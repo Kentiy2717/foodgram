@@ -20,17 +20,18 @@ from food.models import (
     Recipe,
     User
 )
-from food.utils import download_pdf
+# from food.utils import download_pdf
 from .permissions import IsAdminOrReadOnly, IsAuthenticatedOwnerOrReadOnly
 from .serializers import (
     IngredientsSerializer,
     RecipeSerializer,
     TagSerializer,
+    FavouritesSerializer,
     FoodgramUserSerializer,
     SubscribtionsUserSerializer,
     SubscribeCreateSerializer,
     ShoppingCartSerializer,
-    FavouritesSerializer
+    TokenSerializer
 )
 from users.models import Subscribe
 
@@ -233,33 +234,6 @@ class RecipesViewSet(ModelViewSet):
             recipe
         )
 
-#     @action(
-#         methods=['GET'],
-#         detail=False,
-#         permission_classes=(IsAuthenticated,),
-#         url_path='download_shopping_cart',
-#     )
-#     def download_shopping_cart(self, request):
-#         ingredients_obj = (
-#             RecipeIngredients.objects.filter(recipe__carts__user=request.user)
-#             .values('ingredients__name', 'ingredients__measurement_unit')
-#             .annotate(sum_amount=Sum('amount'))
-#         )
-#         data_dict = {}
-#         ingredients_list = []
-#         for item in ingredients_obj:
-#             name = item['ingredients__name'].capitalize()
-#             unit = item['ingredients__measurement_unit']
-#             sum_amount = item['sum_amount']
-#             data_dict[name] = [sum_amount, unit]
-#         for ind, (key, value) in enumerate(data_dict.items(), 1):
-#             if ind < 10:
-#                 ind = '0' + str(ind)
-#             ingredients_list.append(
-#                 f'{ind}. {key} - ' f'{value[0]} ' f'{value[1]}'
-#             )
-#         return download_pdf(ingredients_list)
-
     @action(
         detail=False,
         methods=('get',),
@@ -291,3 +265,29 @@ class RecipesViewSet(ModelViewSet):
             "Content-Disposition"
         ] = "attachment; filename=shopping-list.txt"
         return response
+    
+    @action(
+        detail=False,
+        methods=('get',),
+        permission_classes=(IsAuthenticated,),
+        url_path='(?P<pk>[^/.]+)/get-link',
+    )
+    def get_link(self, request):
+        serializer = TokenSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            token, status_code = serializer.create(
+                validated_data=serializer.validated_data
+            )
+            return Response(TokenSerializer(token).data, status=status_code)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+#     def get_link(self, request):
+#         short_link = get_short_link(request)
+#         return Response({'short_link': short_link})
+# return HttpResponseRedirect(
+#             request.build_absolute_uri(
+#                 f'/recipes/{recipe.id}'
+#                 # reverse('api:recipes-detail', kwargs={'pk': recipe.id})
+#             )
+#         )

@@ -8,7 +8,7 @@ def validate_username(username):
         raise ValidationError(
             'Использовать имя "me" запрещено.'
         )
-    pattern = r'[a-zA-Z0-9@/./+/-/_]'
+    pattern = r'[a-zA-Z0-9@/./+/_/-]'
     banned_symbols = re.sub(pattern, '', username)
     if banned_symbols:
         raise ValidationError(
