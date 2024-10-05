@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.12"]
+        python-version: ["3.8", "3.9", "3.10"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -122,7 +122,7 @@ jobs:
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate users
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py makemigrations food
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-          docker-compose exec backend python manage.py get_of_ingredients --path data/
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py get_of_ingredients --path data/
 
   send_message:
     runs-on: ubuntu-latest
