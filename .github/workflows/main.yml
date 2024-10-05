@@ -155,7 +155,7 @@ jobs:
           sudo docker compose -f docker-compose.production.yml down
           sudo docker image rm kentiy2717/foodgram_backend
           sudo docker compose -f docker-compose.production.yml up -d
-          sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic —no-input
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --noinput
           sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate users zero
           sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate food zero
