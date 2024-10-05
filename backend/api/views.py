@@ -10,7 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
-from food.filters import IngredientFilter, RecipeFilter, Recipe
+from food.filters import IngredientFilter, RecipeFilter
 from food.models import (
     Ingredients,
     RecipeIngredients,
