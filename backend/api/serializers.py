@@ -4,11 +4,9 @@ from django.db import transaction
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
-from djoser.serializers import UserSerializer, UserCreateSerializer
-from rest_framework import serializers, status
+from djoser.serializers import UserSerializer
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
-from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from food.models import (
     Ingredients,
@@ -20,21 +18,20 @@ from food.models import (
     User
 )
 from users.models import Subscribe
-from .validators import validate_username
-from users.constants import NAME_MAX_LENGTH, EMAIL_MAX_LENGTH
 
 
 class Base64ImageField(serializers.ImageField):
     """Сериализатор для картинок."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext) 
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
         return super().to_internal_value(data)
 
 
-class FoodgramUserSerializer(UserSerializer):  # тут все нормально
+class FoodgramUserSerializer(UserSerializer):
     """Сериализатор пользователя."""
 
     is_subscribed = serializers.SerializerMethodField()
@@ -46,12 +43,9 @@ class FoodgramUserSerializer(UserSerializer):  # тут все нормальн�
             return False
         return Subscribe.objects.filter(user=request.user, author=obj).exists()
 
-#     def get_avatar(self, obj):  # Это точно надо?
-#         return obj.avatar.url if obj.avatar else None
-
     class Meta:
         model = User
-        fields = (
+        fields = [
             'email',
             'id',
             'username',
@@ -60,7 +54,7 @@ class FoodgramUserSerializer(UserSerializer):  # тут все нормальн�
             'password',
             'is_subscribed',
             'avatar',
-        )
+        ]
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -109,9 +103,10 @@ class SubscribtionsUserSerializer(FoodgramUserSerializer):
         except (TypeError, ValueError):
             recipes = obj.recipes.all()
         return ShortRecipeSerializer(recipes, many=True).data
-    
+
     class Meta(FoodgramUserSerializer.Meta):
-        fields = FoodgramUserSerializer.Meta.fields + ('recipes', 'recipes_count')
+        fields = FoodgramUserSerializer.Meta.fields + ['recipes',
+                                                       'recipes_count']
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -127,7 +122,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все нормально
+class SubscribeCreateSerializer(serializers.ModelSerializer):
     """Сериализатор подписки."""
 
     user = serializers.SlugRelatedField(
@@ -146,7 +141,7 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все �
                 'Нельзя подписаться на себя.'
             )
         return data
-    
+
     def to_representation(self, instance):
         return SubscribtionsUserSerializer(
             instance.author,
@@ -168,7 +163,7 @@ class SubscribeCreateSerializer(serializers.ModelSerializer):  # тут все �
         ]
 
 
-class SubscribeListSerializer(serializers.ModelSerializer):  # тут все нормально
+class SubscribeListSerializer(serializers.ModelSerializer):
     """Сериализатор подписки."""
 
     is_subscribed = serializers.SerializerMethodField()
@@ -206,10 +201,9 @@ class SubscribeListSerializer(serializers.ModelSerializer):  # тут все н�
             'image',
             'cooking_time',
         )
-        # read_only_fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class SubscribeRecipeSerializer(serializers.ModelSerializer):  # тут все нормально
+class SubscribeRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор подписки."""
 
     class Meta:
@@ -220,10 +214,9 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):  # тут все �
             'image',
             'cooking_time',
         )
-        # read_only_fields = ('id', 'name', 'image', 'cooking_time')  # надо?
 
 
-class TagSerializer(serializers.ModelSerializer):  # тут все нормально
+class TagSerializer(serializers.ModelSerializer):
     """Сериализатор тега."""
 
     class Meta:
@@ -233,10 +226,9 @@ class TagSerializer(serializers.ModelSerializer):  # тут все нормал�
             'name',
             'slug',
         )
-        # read_only_fields = ('id', 'name', 'slug', 'color')
 
 
-class IngredientsSerializer(serializers.ModelSerializer):  # тут все нормально
+class IngredientsSerializer(serializers.ModelSerializer):
     """Сериализатор ингредиента."""
 
     class Meta:
@@ -246,10 +238,9 @@ class IngredientsSerializer(serializers.ModelSerializer):  # тут все но�
             'name',
             'measurement_unit',
         )
-#         read_only_fields = ('id', 'name', 'measurement_unit')  # надо?
 
 
-class IngredientsCreateSerializer(serializers.ModelSerializer):  # тут все нормально
+class IngredientsCreateSerializer(serializers.ModelSerializer):
     """Сериализатор создания ингредиента."""
 
     id = serializers.PrimaryKeyRelatedField(
@@ -262,22 +253,18 @@ class IngredientsCreateSerializer(serializers.ModelSerializer):  # тут все
             'id',
             'amount',
         )
-        # read_only_fields = ('id', 'recipe')  # это точно нужно?
 
 
-class RecipeIngredientsSerializer(serializers.ModelSerializer):  # тут все нормально
+class RecipeIngredientsSerializer(serializers.ModelSerializer):
     """Сериализатор ингредиентов рецепта."""
 
-    # id = serializers.PrimaryKeyRelatedField(
-    #     queryset=Ingredients.objects.all()
-    # )
     id = serializers.IntegerField(
         source='ingredients.id'
     )
-    measurement_unit = serializers.ReadOnlyField(  # в гугле CharField 
+    measurement_unit = serializers.ReadOnlyField(
         source='ingredients.measurement_unit'
     )
-    name = serializers.ReadOnlyField(  # в гугле CharField 
+    name = serializers.ReadOnlyField(
         source='ingredients.name'
     )
 
@@ -297,10 +284,10 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):  # тут все
         ]
 
 
-class RecipeListSerializer(serializers.ModelSerializer):    # тут все нормально
+class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор рецептов."""
 
-    tags = TagSerializer(many=True, read_only=True)  # read_only=True точно надо?
+    tags = TagSerializer(many=True, read_only=True)
     author = FoodgramUserSerializer(read_only=True)
     ingredients = RecipeIngredientsSerializer(
         many=True,
@@ -309,11 +296,7 @@ class RecipeListSerializer(serializers.ModelSerializer):    # тут все но
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
-#     def get_ingredients(self, obj):
-#         ingredients = RecipeIngredients.objects.filter(recipe=obj)
-#         return IngredientsSerializer(ingredients, many=True).data
-
-    def get_is_favorited(self, obj):  # тут не совпадает с гуглом
+    def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
@@ -322,7 +305,7 @@ class RecipeListSerializer(serializers.ModelSerializer):    # тут все но
             recipe=obj
         ).exists()
 
-    def get_is_in_shopping_cart(self, obj):  # тут не совпадает с гуглом
+    def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
@@ -345,15 +328,9 @@ class RecipeListSerializer(serializers.ModelSerializer):    # тут все но
             'text',
             'cooking_time',
         )
-#         read_only_fields = (
-#             'id',
-#             'author',
-#             'is_favorited',
-#             'is_in_shopping_cart'
-#         )
 
 
-class RecipeSerializer(serializers.ModelSerializer):    # тут все нормально
+class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор рецепта."""
 
     tags = serializers.PrimaryKeyRelatedField(
@@ -400,7 +377,6 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
         RecipeIngredients.objects.bulk_create(ingredients_list)
         return recipe
 
-#    @transaction.atomic
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
@@ -420,7 +396,7 @@ class RecipeSerializer(serializers.ModelSerializer):    # тут все норм
             RecipeIngredients.objects.bulk_create(ingredients_list)
         return instance
 
-    def validate(self, data):  # в гугле другое
+    def validate(self, data):
         ingredients = self.initial_data.get('ingredients', [])
         ingredients_id = [ingredient.get('id') for ingredient in ingredients]
         tags = self.initial_data.get('tags', [])

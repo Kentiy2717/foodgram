@@ -16,7 +16,7 @@ from food.constants import (
 User = get_user_model()
 
 
-class Ingredients(models.Model):  # тут все нормально
+class Ingredients(models.Model):
     name = models.CharField(
         verbose_name='Название ингредиента',
         max_length=MAX_NAME_LENGTH
@@ -30,18 +30,12 @@ class Ingredients(models.Model):  # тут все нормально
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
-        # constraints = (  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
-        #     models.UniqueConstraint(  
-        #         fields=['name', 'measurement_unit'],
-        #         name='unique_ingredient'
-        #     )
-        # )
 
     def __str__(self):
-        return f'{self.name}, {self.measurement_unit}'  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
+        return f'{self.name}, {self.measurement_unit}'
 
 
-class Tag(models.Model):  # тут все нормально
+class Tag(models.Model):
     name = models.CharField(
         verbose_name='Название тега',
         max_length=MAX_NAME_LENGTH,
@@ -61,7 +55,7 @@ class Tag(models.Model):  # тут все нормально
         return self.name
 
 
-class Recipe(models.Model):  # тут все нормально
+class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -109,30 +103,25 @@ class Recipe(models.Model):  # тут все нормально
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
-        return f'{self.name} ({self.author})'  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
-    
+        return f'{self.name} ({self.author})'
+
     def save(self, *args, **kwargs):
-        """
-        При создании токена достаточно только полной ссылки,
-        короткая ссылка генерируется автоматически.
-        Перед сохранением объекта токен проверяется на уникальность
-        """
         if not self.short_url:
-            while True:  # цикл будет повторять до тех пор пока не сгенерирует уникальную ссылку
+            while True:
                 self.short_url = ''.join(
                     random.choices(
-                        CHARACTERS,  # алфавит для генерации короткой ссылки мы будем хранить в файле настроек
-                        k=TOKEN_LENGTH  # длину короткой ссылки тоже
+                        CHARACTERS,
+                        k=TOKEN_LENGTH
                     )
                 )
-                if not Recipe.objects.filter(  # проверка на уникальность
+                if not Recipe.objects.filter(
                     short_url=self.short_url
                 ).exists():
                     break
         super().save(*args, **kwargs)
 
 
-class RecipeIngredients(models.Model):  # тут все нормально
+class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -154,18 +143,12 @@ class RecipeIngredients(models.Model):  # тут все нормально
     class Meta:
         verbose_name = 'Ингредиент рецепта'
         verbose_name_plural = 'Ингредиенты рецепта'
-        # constraints = (  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
-        #     models.UniqueConstraint(
-        #         fields=('recipe', 'ingredients'),
-        #         name='unique_recipe_ingredients'
-        #     )
-        # )
 
     def __str__(self):
         return f"{self.recipe.name} - {self.ingredients.name}"
 
 
-class Favourites(models.Model):  # тут все нормально
+class Favourites(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -182,18 +165,12 @@ class Favourites(models.Model):  # тут все нормально
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
-        # constraints = (  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
-        #     models.UniqueConstraint(
-        #         fields=('user', 'recipe'),
-        #         name='unique_favourites'
-        #     )
-        # )
 
     def __str__(self):
         return f"{self.user} - {self.recipe}"
 
 
-class ShoppingCart(models.Model):  # тут все нормально
+class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -210,9 +187,3 @@ class ShoppingCart(models.Model):  # тут все нормально
     class Meta:
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-        # constraints = (  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!
-        #     models.UniqueConstraint(
-        #         fields=('user', 'recipe'),
-        #         name='unique_shopping_cart'
-        #     )
-        # )

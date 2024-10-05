@@ -3,10 +3,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
@@ -21,8 +20,8 @@ from food.models import (
     Recipe,
     User
 )
-# from food.utils import download_pdf
-from .permissions import IsAdminOrReadOnly, IsAuthenticatedOwnerOrReadOnly
+
+from .permissions import IsAuthenticatedOwnerOrReadOnly
 from .serializers import (
     AvatarSerializer,
     IngredientsSerializer,
@@ -47,7 +46,7 @@ class FoodgramUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, id):
-        '''Подписка на пользователя'''
+        """Подписка на пользователя."""
         author = get_object_or_404(User, id=id)
         data = {'author': author.id}
         serializer = SubscribeCreateSerializer(
@@ -57,10 +56,10 @@ class FoodgramUserViewSet(UserViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     @subscribe.mapping.delete
     def unsubscribe(self, request, id):
-        '''Отписка от пользователя'''
+        """Отписка от пользователя."""
         author = get_object_or_404(User, id=id)
         counter, _ = Subscribe.objects.filter(
             user=request.user,
@@ -79,7 +78,7 @@ class FoodgramUserViewSet(UserViewSet):
     def me(self, request):
         serializer = FoodgramUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     @action(
         methods=['PUT'],
         detail=False,
@@ -95,7 +94,7 @@ class FoodgramUserViewSet(UserViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     @put_avatar.mapping.delete
     def delete_avatar(self, request):
         user = self.get_instance()
@@ -103,7 +102,7 @@ class FoodgramUserViewSet(UserViewSet):
             user.avatar.delete()
             user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @action(
         methods=['GET'],
         detail=False,
@@ -120,23 +119,6 @@ class FoodgramUserViewSet(UserViewSet):
         return self.get_paginated_response(serializer.data)
 
 
-# class AvatarViewSet(APIView):
-#     permission_classes = [IsAuthenticated]
-# 
-#     def put(self, request):
-#         serializer = FoodgramUserSerializer(
-#             request.user,
-#             data=request.data,
-#             partial=True
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
-#     
-#     def delete(self, request):
-#         return Response({'success': 'Avatar deleted'})
-
-
 class IngredientsViewSet(ModelViewSet):
     queryset = Ingredients.objects.all()
     serializer_class = IngredientsSerializer
@@ -144,24 +126,6 @@ class IngredientsViewSet(ModelViewSet):
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = IngredientsSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
-
-
-# class RecipesViewSet(ModelViewSet):
-#     queryset = Recipe.objects.all()
-#     serializer_class = RecipeSerializer
-#     http_method_names = ('get', 'patch', 'post', 'delete')
-# 
-#     def post(self, request, *args, **kwargs):
-#         serializer = RecipeSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
 
 
 class TagsViewSet(ModelViewSet):
@@ -267,7 +231,7 @@ class RecipesViewSet(ModelViewSet):
             "Content-Disposition"
         ] = "attachment; filename=shopping-list.txt"
         return response
-    
+
     @action(
         detail=True,
         methods=('get',),
@@ -279,7 +243,7 @@ class RecipesViewSet(ModelViewSet):
             f'/s/{recipe.short_url}'
         )
         return Response({'short-link': url}, status=status.HTTP_200_OK)
-    
+
     @action(
         detail=False,
         methods=('get',),

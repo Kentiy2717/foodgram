@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from .constants import NAME_MAX_LENGTH, EMAIL_MAX_LENGTH
 from api.validators import validate_username
 
+
 class User(AbstractUser):
     """Модель пользователя."""
 
@@ -83,7 +84,7 @@ class Subscribe(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        constraints = (  # !!!!! ПРОВЕРЬ ТОЧНО ЛИ ЭТО НУЖНО !!!!!  
+        constraints = (
             models.UniqueConstraint(
                 fields=('user', 'author'),
                 name='unique_subscription'

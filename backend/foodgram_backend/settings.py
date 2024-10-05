@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -81,12 +80,6 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -128,37 +121,20 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-#         'rest_framework.authentication.BasicAuthentication',
-#         'rest_framework.authentication.SessionAuthentication'
     ],
-
-#    'DEFAULT_AUTHENTICATION_CLASSES': [
-#        'rest_framework_simplejwt.authentication.JWTAuthentication',
-#    ],
-
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 6,
 }
 
 DJOSER = {
-    # 'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    # 'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    # 'ACTIVATION_URL': '#/activate/{uid}/{token}',
-    # 'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user': 'api.serializers.FoodgramUserSerializer',
-        # 'current_user': 'api.serializers.FoodgramUserSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
-    'HIDE_USERS': False  # Если установлено значение True, то при перечислении /users/ enpoint обычным пользователем в списке будет отображаться только профиль
+    'HIDE_USERS': False
 }
-
-#SIMPLE_JWT = {
-#    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-#    'AUTH_HEADER_TYPES': ('Bearer',),
-#}
 
 AUTH_USER_MODEL = 'users.User'
