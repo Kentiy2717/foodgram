@@ -21,8 +21,9 @@ from food.models import (
     User
 )
 
-from .permissions import IsAuthenticatedOwnerOrReadOnly
-from .serializers import (
+from api.pagination import RecipesPagination
+from api.permissions import IsAuthenticatedOwnerOrReadOnly
+from api.serializers import (
     AvatarSerializer,
     IngredientsSerializer,
     RecipeSerializer,
@@ -141,7 +142,7 @@ class RecipesViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    pagination_class = LimitOffsetPagination
+    pagination_class = RecipesPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
