@@ -121,12 +121,6 @@ class Recipe(models.Model):
                     break
         super().save(*args, **kwargs)
 
-#     def clean(self):
-#         if self.ingredients.count() == 0:
-#             raise ValidationError(
-#                 'Нужен хотя бы один ингредиент'
-#             )
-
 
 class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(

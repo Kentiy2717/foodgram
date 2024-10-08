@@ -1,6 +1,6 @@
-from django.db.models import Count, Sum
+from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
@@ -143,12 +143,6 @@ class RecipesViewSet(ModelViewSet, ):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = RecipesPagination
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = Recipe.objects.annotate(count_favorites=Count('favourites'))
-        return queryset
-
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
