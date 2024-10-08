@@ -1,11 +1,11 @@
 """Модель пользователя."""
 
+from django.contrib import admin
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 
-from .constants import NAME_MAX_LENGTH, EMAIL_MAX_LENGTH
-from api.validators import validate_username
+from .constants import EMAIL_MAX_LENGTH
 
 
 class User(AbstractUser):
@@ -15,14 +15,17 @@ class User(AbstractUser):
     REQUIRED_FIELDS = (
         'username',
         'first_name',
-        'last_name',
-        'password'
+        'last_name'
     )
 
     email = models.EmailField(
         verbose_name='Электронная почта',
         max_length=EMAIL_MAX_LENGTH,
         unique=True
+    )
+    is_subscribed = models.BooleanField(
+        verbose_name='Статус подписки',
+        default=False
     )
     avatar = models.ImageField(
         verbose_name='Аватар',
@@ -65,7 +68,7 @@ class Subscribe(models.Model):
                 name='unique_subscription'
             ),
         )
-    
+
     def clean(self):
         if self.user == self.author:
             raise ValidationError(

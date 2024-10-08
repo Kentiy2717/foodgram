@@ -11,6 +11,7 @@ services:
       - pg_data_volume:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    restart: always
 
   backend:
     build: ./backend/
@@ -20,6 +21,7 @@ services:
       - media_volume:/app/media/
     depends_on: 
       - db
+    restart: always
 
   frontend:
     build: ./frontend/
@@ -40,4 +42,5 @@ services:
     depends_on:
       - backend
       - frontend
+    restart: always
       

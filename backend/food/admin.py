@@ -7,7 +7,6 @@ from food.models import (
     ShoppingCart,
     Recipe,
     RecipeIngredients,
-    User
 )
 
 
@@ -20,6 +19,7 @@ class IngredientsInline(admin.StackedInline):
             kwargs['queryset'] = Ingredients.objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (IngredientsInline,)
 
@@ -27,6 +27,5 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredients)
 admin.site.register(Tag)
-admin.site.register(User)
 admin.site.register(ShoppingCart)
 admin.site.register(Favourites)
