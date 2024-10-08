@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -136,13 +136,19 @@ class TagsViewSet(ModelViewSet):
     pagination_class = None
 
 
-class RecipesViewSet(ModelViewSet):
+class RecipesViewSet(ModelViewSet, ):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthenticatedOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = RecipesPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = Recipe.objects.annotate(count_favorites=Count('favourites'))
+        return queryset
+
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -244,14 +250,3 @@ class RecipesViewSet(ModelViewSet):
             f'/s/{recipe.short_url}'
         )
         return Response({'short-link': url}, status=status.HTTP_200_OK)
-
-    @action(
-        detail=False,
-        methods=('get',),
-        url_path=r's/(?P<short_url>\w+)'
-    )
-    def redirect_link(self, request, short_url):
-        recipe = get_object_or_404(Recipe, short_url=short_url)
-        return HttpResponseRedirect(
-            request.build_absolute_uri(f'/recipes/{recipe.id}/')
-        )

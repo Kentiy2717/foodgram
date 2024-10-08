@@ -2,6 +2,7 @@ import random
 
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from food.constants import (
@@ -120,6 +121,12 @@ class Recipe(models.Model):
                     break
         super().save(*args, **kwargs)
 
+#     def clean(self):
+#         if self.ingredients.count() == 0:
+#             raise ValidationError(
+#                 'Нужен хотя бы один ингредиент'
+#             )
+
 
 class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(
@@ -166,6 +173,15 @@ class Favourites(models.Model):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
 
+    def clean(self):
+        if Favourites.objects.filter(
+            user=self.user,
+            recipe=self.recipe
+        ).exists():
+            raise ValidationError(
+                'Рецепт уже добавлен в избранное.'
+            )
+
     def __str__(self):
         return f"{self.user} - {self.recipe}"
 
@@ -187,3 +203,12 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+
+    def clean(self):
+        if ShoppingCart.objects.filter(
+            user=self.user,
+            recipe=self.recipe
+        ).exists():
+            raise ValidationError(
+                'Рецепт уже добавлен в список покупок.'
+            )
