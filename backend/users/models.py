@@ -24,32 +24,6 @@ class User(AbstractUser):
         max_length=EMAIL_MAX_LENGTH,
         unique=True
     )
-    username = models.CharField(
-        verbose_name='Имя пользователя',
-        max_length=NAME_MAX_LENGTH,
-        unique=True,
-        validators=(validate_username,),
-    )
-    first_name = models.CharField(
-        verbose_name='Имя',
-        max_length=NAME_MAX_LENGTH
-    )
-    last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=NAME_MAX_LENGTH
-    )
-    password = models.CharField(
-        verbose_name='Пароль',
-        max_length=NAME_MAX_LENGTH
-    )
-    is_staff = models.BooleanField(
-        verbose_name='Статус персонала',
-        default=False
-    )
-    is_subscribed = models.BooleanField(
-        verbose_name='Статус подписки',
-        default=False
-    )
     avatar = models.ImageField(
         verbose_name='Аватар',
         upload_to='users/',
