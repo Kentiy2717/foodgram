@@ -10,17 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
-from food.filters import IngredientFilter, RecipeFilter
-from food.models import (
-    Ingredients,
-    RecipeIngredients,
-    Favourites,
-    ShoppingCart,
-    Tag,
-    Recipe,
-    User
-)
-
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import RecipesPagination
 from api.permissions import IsAuthenticatedOwnerOrReadOnly
 from api.serializers import (
@@ -33,6 +23,15 @@ from api.serializers import (
     SubscribtionsUserSerializer,
     SubscribeCreateSerializer,
     ShoppingCartSerializer
+)
+from food.models import (
+    Ingredients,
+    RecipeIngredients,
+    Favourites,
+    ShoppingCart,
+    Tag,
+    Recipe,
+    User
 )
 from users.models import Subscribe
 
@@ -111,7 +110,9 @@ class FoodgramUserViewSet(UserViewSet):
     )
     def subscriptions(self, request):
         subscribtions = Subscribe.objects.filter(user=request.user)
-        authors = User.objects.filter(author_subscription__in=subscribtions)
+        authors = User.objects.filter(
+            subscriptions_on_author__in=subscribtions
+        )
         serializer = SubscribtionsUserSerializer(
             self.paginate_queryset(authors),
             many=True,

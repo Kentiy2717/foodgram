@@ -1,5 +1,3 @@
-"""Модель пользователя."""
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -48,13 +46,13 @@ class Subscribe(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='Subscriber',
+        related_name='user_subscriptions',
         verbose_name='Подписчик'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_subscription',
+        related_name='subscriptions_on_author',
         verbose_name='Автор'
     )
 
@@ -73,3 +71,6 @@ class Subscribe(models.Model):
             raise ValidationError(
                 'Нельзя подписаться на себя.'
             )
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
