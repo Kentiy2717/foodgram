@@ -44,7 +44,7 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Количество в избранном')
     def favorites_count(self, obj):
         return obj.favourites.count()
-    
+
     @admin.display(description='Ингредиенты')
     def ingredients_list(self, obj):
         return ', '.join([

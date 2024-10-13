@@ -13,14 +13,19 @@ class Command(BaseCommand):
         parser.add_argument('--path', type=str, help='Путь к файлу')
 
     def handle(self, *args, **options):
-        '''
-        Загрузка данных из csv файла в модель Ingredients.
-        При помощи метода bulk_create.
-        со страховкой открытия файла.'''
+        self.stdout.write(self.style.SUCCESS('Загрузка данных...'))
         file_path = options['path'] + 'ingredients.csv'
-        with open(file_path, encoding='utf-8') as file:
-            ingredients = list(csv.reader(file))
-            Ingredients.objects.bulk_create([
-                Ingredients(name=ingredient[0], measurement_unit=ingredient[1])
-                for ingredient in ingredients
-            ], ignore_conflicts=False)
+        try:
+            with open(file_path, encoding='utf-8') as file:
+                ingredients = list(csv.reader(file))
+                Ingredients.objects.bulk_create([
+                    Ingredients(
+                        name=ingredient[0],
+                        measurement_unit=ingredient[1]
+                    )
+                    for ingredient in ingredients
+                ], ignore_conflicts=True)
+                self.stdout.write(self.style.SUCCESS('Данные загружены'))
+        except FileNotFoundError:
+            self.stdout.write(self.style.ERROR('Файл не существует'))
+            return
