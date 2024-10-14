@@ -56,7 +56,7 @@ class FoodgramUserViewSet(UserViewSet):
         }
         serializer = SubscribeCreateSerializer(
             data=data,
-            context={'request': request},
+            context=self.get_serializer_context(),
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
@@ -85,7 +85,7 @@ class FoodgramUserViewSet(UserViewSet):
     def me(self, request):
         serializer = FoodgramUserSerializer(
             request.user,
-            context={'request': request}
+            context=self.get_serializer_context()
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -100,7 +100,7 @@ class FoodgramUserViewSet(UserViewSet):
             instance=self.get_instance(),
             data=request.data,
             partial=True,
-            context={'request': request}
+            context=self.get_serializer_context()
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -108,9 +108,8 @@ class FoodgramUserViewSet(UserViewSet):
 
     @put_avatar.mapping.delete
     def delete_avatar(self, request):
-        user = self.get_instance()
+        user = self.request.user
         user.avatar.delete()
-        user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -123,11 +122,11 @@ class FoodgramUserViewSet(UserViewSet):
             subscriptions_on_author__user=request.user
         ).annotate(
             recipes_count=Sum('recipes__id')
-        )
+        ).order_by('username')
         serializer = SubscribtionsUserSerializer(
             self.paginate_queryset(authors),
             many=True,
-            context={'request': request}
+            context=self.get_serializer_context()
         )
         return self.get_paginated_response(serializer.data)
 
@@ -184,10 +183,11 @@ class RecipesViewSet(ModelViewSet):
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
-        if Favourites.objects.filter(
+        delete, _ = Favourites.objects.filter(
             user=request.user,
             recipe=pk
-        ).delete():
+        ).delete()
+        if delete:
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -204,10 +204,11 @@ class RecipesViewSet(ModelViewSet):
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
-        if ShoppingCart.objects.filter(
+        delete, _ = ShoppingCart.objects.filter(
             user=request.user,
             recipe=pk
-        ).delete():
+        ).delete()
+        if delete:
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -223,15 +224,15 @@ class RecipesViewSet(ModelViewSet):
             RecipeIngredients.objects.filter(
                 recipe__shoppingcart__user=request.user
             )
-            .values('ingredients',)
+            .values('ingredients__name', 'ingredients__measurement_unit')
             .annotate(amount=Sum('amount'))
-            .order_by('ingredients')
+            .order_by('ingredients__name')
         )
-        purchased_in_file = "\n".join(get_purchased_in_file(buy))
-        response = FileResponse(purchased_in_file, content_type="text/plain")
+        purchased_in_file = '\n'.join(get_purchased_in_file(buy))
+        response = FileResponse(purchased_in_file, content_type='text/plain')
         response[
-            "Content-Disposition"
-        ] = "attachment; filename=shopping-list.txt"
+            'Content-Disposition'
+        ] = 'attachment; filename=shopping-list.txt'
         return response
 
     @action(

@@ -20,10 +20,10 @@ class Command(BaseCommand):
                 ingredients = list(csv.reader(file))
                 Ingredients.objects.bulk_create([
                     Ingredients(
-                        name=ingredient[0],
-                        measurement_unit=ingredient[1]
+                        name=name,
+                        measurement_unit=measurement_unit
                     )
-                    for ingredient in ingredients
+                    for name, measurement_unit in ingredients
                 ], ignore_conflicts=True)
                 self.stdout.write(self.style.SUCCESS('Данные загружены'))
         except FileNotFoundError:

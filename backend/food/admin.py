@@ -17,11 +17,6 @@ class IngredientsInline(admin.StackedInline):
     extra = 1
     min_num = 1
 
-#     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-#         if db_field.name == 'ingredients':
-#             kwargs['queryset'] = Ingredients.objects.all()
-#         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):

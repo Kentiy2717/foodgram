@@ -20,10 +20,6 @@ class User(AbstractUser):
         max_length=EMAIL_MAX_LENGTH,
         unique=True
     )
-    is_subscribed = models.BooleanField(
-        verbose_name='Статус подписки',
-        default=False
-    )
     avatar = models.ImageField(
         verbose_name='Аватар',
         upload_to='users/',
