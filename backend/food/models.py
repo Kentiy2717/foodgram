@@ -33,7 +33,7 @@ class Ingredients(models.Model):
         ordering = ('name',)
         constraints = (
             models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
+                fields=('name', 'measurement_unit'),
                 name='unique_ingredients'
             ),
         )
@@ -152,7 +152,7 @@ class RecipeIngredients(models.Model):
         return f"{self.recipe.name} - {self.ingredients.name}"
 
 
-class UserRecipe(models.Model):
+class UserRecipeAbstrakt(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -179,15 +179,15 @@ class UserRecipe(models.Model):
         return f'{self.user} - {self.recipe}. {self._meta.verbose_name}'
 
 
-class Favourites(UserRecipe):
+class Favourites(UserRecipeAbstrakt):
 
-    class Meta(UserRecipe.Meta):
+    class Meta(UserRecipeAbstrakt.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
 
 
-class ShoppingCart(UserRecipe):
+class ShoppingCart(UserRecipeAbstrakt):
 
-    class Meta(UserRecipe.Meta):
+    class Meta(UserRecipeAbstrakt.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'

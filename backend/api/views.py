@@ -108,8 +108,7 @@ class FoodgramUserViewSet(UserViewSet):
 
     @put_avatar.mapping.delete
     def delete_avatar(self, request):
-        user = self.request.user
-        user.avatar.delete()
+        self.request.user.avatar.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
