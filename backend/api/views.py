@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -120,7 +120,7 @@ class FoodgramUserViewSet(UserViewSet):
         authors = User.objects.filter(
             subscriptions_on_author__user=request.user
         ).annotate(
-            recipes_count=Sum('recipes__id')
+            recipes_count=Count('recipes')
         ).order_by('username')
         serializer = SubscribtionsUserSerializer(
             self.paginate_queryset(authors),
