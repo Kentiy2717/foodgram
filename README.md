@@ -1,17 +1,11 @@
-Находясь в папке infra, выполните команду docker-compose up. При выполнении этой команды контейнер frontend, описанный в docker-compose.yml, подготовит файлы, необходимые для работы фронтенд-приложения, а затем прекратит свою работу.
-
-По адресу http://localhost изучите фронтенд веб-приложения, а по адресу http://localhost/api/docs/ — спецификацию API.
-
 ### Проект "Фудграм"
-Дипломный проект в рамках обучения на курсе "Python разработчик буткемп" Яндекс Практикума. Разработка бэкенд приложения и настройка автодеплоя на сервер в Docker.
+Дипломный проект в рамках обучения на курсе "Python разработчик буткемп" Яндекс Практикума. Разработка бэкенд в виде REST API для веб-приложения и настройка автоматической публикации этого веб-приложения на виртуальном удалённом сервере.
 
 ![example workflow](https://github.com/Kentiy2717/foodgram/actions/workflows/main.yml/badge.svg)
 
-Август 2024.
-
 ### Технологии
 
-Python, Django, Django Rest Framework, Pytest, Flake8, Docker, CI/CD
+Python, Django, Django Rest Framework, REST API, Docker, Nginx, GitHub, GitHub Actions
 
 ### Команда проекта
 
@@ -26,6 +20,8 @@ Python, Django, Django Rest Framework, Pytest, Flake8, Docker, CI/CD
 Ревьюер:
 
 Евгений Салахутдинов.
+
+2024г.
 
 ### Как запустить проект
 
@@ -103,3 +99,9 @@ bash start-local-docker.sh
     ]
 }
 ```
+
+### Документация локально
+
+Находясь в папке infra, выполните команду docker-compose up. При выполнении этой команды контейнер frontend, описанный в docker-compose.yml, подготовит файлы, необходимые для работы фронтенд-приложения, а затем прекратит свою работу.
+
+По адресу http://localhost изучите фронтенд веб-приложения, а по адресу http://localhost/api/docs/ — спецификацию API.
